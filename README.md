@@ -18,6 +18,22 @@ Without the patched `meson-ir.ko`, `rc0` exists but stays silent — the
 SC2 block needs the vendor IRQ register write. The DTB in the release
 contains the working `ir@84040` node.
 
+### Hardware decoder must be armed
+
+`meson-s4-ir` uses the SC2 hardware decoder, which stays disabled until
+userspace selects a protocol. Without it `rc0` registers but the IRQ
+never fires and `ir-keytable -t` shows nothing. Enable NEC once per boot:
+
+```sh
+echo nec > /sys/class/rc/rc0/protocols
+# or: ir-keytable -s rc0 -p nec
+```
+
+Armbian images built from `AmakerGame/amlogic-s9xxx-armbian` ship an
+enabled `ir-nec.service` that does this automatically after `rc0`
+appears. Verified live: NEC scancodes (e.g. `0x116`) decode on
+`/dev/input/event0`.
+
 ## Releases
 
 See [Releases](../../releases) for `x96-ir-6.18.59-meson64.tar.gz`,
